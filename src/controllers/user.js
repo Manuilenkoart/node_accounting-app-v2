@@ -1,29 +1,19 @@
-const checkIsValidSchema = require('../utils/checkIsValidSchema');
-
-let USERS = [];
-let USERS_ID = 1;
-
-const UserSchema = {
-  id: 'number',
-  name: 'string',
-};
+const { userService } = require('../service');
 
 const create = (req, res) => {
-  const { name } = req.body;
+  const newRecord = userService.create(req.body);
 
-  const newRecord = {
-    id: USERS_ID,
-    name,
-  };
+  if (!newRecord) {
+    return res.sendStatus(400);
+  }
 
-  USERS.push(newRecord);
-  USERS_ID++;
-
-  res.send(newRecord);
+  res.status(201).send(newRecord);
 };
 
 const getAll = (req, res) => {
-  res.send(USERS);
+  const data = userService.getAll();
+
+  res.send(data);
 };
 
 const getById = (req, res) => {
@@ -33,7 +23,7 @@ const getById = (req, res) => {
     return res.sendStatus(400);
   }
 
-  const record = USERS.find((u) => u.id === +id);
+  const record = userService.getById(+id);
 
   if (!record) {
     return res.sendStatus(404);
@@ -49,42 +39,34 @@ const remove = (req, res) => {
     return res.sendStatus(404);
   }
 
-  const removed = USERS.filter((u) => u.id !== +id);
+  const record = userService.getById(+id);
 
-  if (USERS.length === removed.length) {
+  if (!record) {
     return res.sendStatus(404);
   }
 
-  USERS = removed;
+  userService.remove(+id);
 
   res.sendStatus(204);
 };
 
 const patch = (req, res) => {
   const { id } = req.params;
+  const { name } = req.body;
 
   if (!id) {
     return res.sendStatus(400);
   }
 
-  const { name } = req.body;
+  const record = userService.getById(+id);
 
-  if (!checkIsValidSchema(UserSchema, { name })) {
+  if (!record) {
     return res.sendStatus(400);
   }
 
-  const index = USERS.findIndex((u) => u.id === +id);
+  const updated = userService.update(+id, name);
 
-  if (index < 0) {
-    return res.sendStatus(404);
-  }
-
-  const record = USERS[index];
-  const newRecord = { ...record, name };
-
-  USERS[index] = newRecord;
-
-  res.send(newRecord);
+  res.send(updated);
 };
 
 module.exports = {

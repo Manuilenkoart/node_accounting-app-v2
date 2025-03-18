@@ -1,45 +1,25 @@
-const checkIsValidSchema = require('../utils/checkIsValidSchema');
-
-let EXPENSE = [];
-let EXPENSE_ID = 1;
-
-const ExpenseSchema = {
-  id: 'number',
-  userId: 'number',
-  spentAt: 'string',
-  title: 'string',
-  amount: 'number',
-  category: 'string',
-  note: 'string',
-};
+const { expenseService, userService } = require('../service');
 
 const create = (req, res) => {
-  const newRecord = {
-    id: EXPENSE_ID,
-    ...req.body,
-  };
+  const newRecord = expenseService.create(req.body);
 
-  if (!checkIsValidSchema(ExpenseSchema, newRecord)) {
+  if (!newRecord) {
     return res.sendStatus(400);
   }
 
-  // const hasUser = USERS.some((u) => u.id === newRecord.userId);
+  const user = userService.getById(newRecord.userId);
 
-  // eslint-disable-next-line no-console
-  // console.log({ USERS, hasUser, newRecord });
-
-  // if (!hasUser) {
-  //   return res.sendStatus(404);
-  // }
-
-  EXPENSE.push(newRecord);
-  EXPENSE_ID++;
+  if (!user) {
+    return res.sendStatus(400);
+  }
 
   res.status(201).send(newRecord);
 };
 
 const getAll = (req, res) => {
-  res.send(EXPENSE);
+  const data = expenseService.getAll(req.query);
+
+  res.send(data);
 };
 
 const getById = (req, res) => {
@@ -49,12 +29,10 @@ const getById = (req, res) => {
     return res.sendStatus(400);
   }
 
-  const record = EXPENSE.find((u) => u.id === +id);
+  const record = expenseService.getById(+id);
 
   if (!record) {
-    return res
-      .sendStatus(404)
-      .send({ error: `Record with id: ${id} doesn't exist` });
+    return res.sendStatus(404);
   }
 
   res.send(record);
@@ -67,7 +45,13 @@ const remove = (req, res) => {
     return res.sendStatus(400);
   }
 
-  EXPENSE = EXPENSE.filter((u) => u.id !== +id);
+  const expence = expenseService.getById(+id);
+
+  if (!expence) {
+    return res.sendStatus(404);
+  }
+
+  expenseService.remove(+id);
 
   res.sendStatus(204);
 };
@@ -79,24 +63,15 @@ const patch = (req, res) => {
     return res.sendStatus(400);
   }
 
-  const { name } = req.body;
+  const expense = expenseService.getById(+id);
 
-  if (!checkIsValidSchema(ExpenseSchema, { name })) {
-    return res.status(422).send({ error: 'Invalid type schema' });
-  }
-
-  const index = EXPENSE.findIndex((u) => u.id === +id);
-
-  if (index < 0) {
+  if (!expense) {
     return res.sendStatus(404);
   }
 
-  const record = EXPENSE[index];
-  const newRecord = { ...record, name };
+  const updated = expenseService.update(+id, req.body);
 
-  EXPENSE[index] = newRecord;
-
-  res.send(newRecord);
+  res.send(updated);
 };
 
 module.exports = {
