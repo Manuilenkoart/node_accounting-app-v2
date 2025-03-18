@@ -1,16 +1,15 @@
 const checkIsValidSchema = require('../utils/checkIsValidSchema');
 
 let USERS = [];
-let USERS_ID = 0;
+let USERS_ID = 1;
 
 const UserSchema = {
+  id: 'number',
   name: 'string',
 };
 
 const create = (req, res) => {
   const { name } = req.body;
-
-  USERS_ID++;
 
   const newRecord = {
     id: USERS_ID,
@@ -18,6 +17,7 @@ const create = (req, res) => {
   };
 
   USERS.push(newRecord);
+  USERS_ID++;
 
   res.send(newRecord);
 };
@@ -30,15 +30,13 @@ const getById = (req, res) => {
   const { id } = req.params;
 
   if (!id) {
-    return res.status(400).send({ error: 'Required parameter is not passed' });
+    return res.sendStatus(400);
   }
 
   const record = USERS.find((u) => u.id === +id);
 
   if (!record) {
-    return res
-      .status(404)
-      .send({ error: `Record with id: ${id} doesn't exist` });
+    return res.sendStatus(404);
   }
 
   res.send(record);
@@ -48,33 +46,37 @@ const remove = (req, res) => {
   const { id } = req.params;
 
   if (!id) {
-    return res.status(400).send({ error: 'Required parameter is not passed' });
+    return res.sendStatus(404);
   }
 
-  USERS = USERS.filter((u) => u.id !== +id);
+  const removed = USERS.filter((u) => u.id !== +id);
 
-  res.status(204).send();
+  if (USERS.length === removed.length) {
+    return res.sendStatus(404);
+  }
+
+  USERS = removed;
+
+  res.sendStatus(204);
 };
 
 const patch = (req, res) => {
   const { id } = req.params;
 
   if (!id) {
-    return res.status(400).send({ error: 'Required parameter is not passed' });
+    return res.sendStatus(400);
   }
 
   const { name } = req.body;
 
   if (!checkIsValidSchema(UserSchema, { name })) {
-    return res.status(422).send({ error: 'Invalid type schema' });
+    return res.sendStatus(400);
   }
 
   const index = USERS.findIndex((u) => u.id === +id);
 
   if (index < 0) {
-    return res
-      .status(404)
-      .send({ error: `Record with id: ${id} doesn't exist` });
+    return res.sendStatus(404);
   }
 
   const record = USERS[index];

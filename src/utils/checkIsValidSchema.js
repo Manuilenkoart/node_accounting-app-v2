@@ -1,12 +1,16 @@
-const checkIsValidSchema = (Ischema, Ifields) => {
-  return Object.entries(Ifields).every(([key, value]) => {
-    if (!Ischema[key]) {
+const checkIsValidSchema = (schema, fields) => {
+  const hasAllKeys = Object.keys(schema).every((k) => fields[k]);
+
+  const isValidTypes = Object.entries(fields).every(([key, value]) => {
+    if (!schema[key]) {
       return false;
     }
 
     // eslint-disable-next-line valid-typeof
-    return Ischema[key] === typeof value;
+    return schema[key] === typeof value;
   });
+
+  return isValidTypes && hasAllKeys;
 };
 
 module.exports = checkIsValidSchema;
