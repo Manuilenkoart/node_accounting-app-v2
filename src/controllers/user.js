@@ -36,7 +36,7 @@ const remove = (req, res) => {
   const { id } = req.params;
 
   if (!id) {
-    return res.sendStatus(404);
+    return res.sendStatus(400);
   }
 
   const record = userService.getById(+id);
@@ -58,10 +58,10 @@ const patch = (req, res) => {
     return res.sendStatus(400);
   }
 
-  const record = userService.getById(+id);
+  const user = userService.getById(+id);
 
-  if (!record) {
-    return res.sendStatus(400);
+  if (!user) {
+    return res.sendStatus(404);
   }
 
   const updated = userService.update(+id, name);

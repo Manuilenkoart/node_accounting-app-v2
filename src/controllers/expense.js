@@ -1,15 +1,15 @@
 const { expenseService, userService } = require('../service');
 
 const create = (req, res) => {
-  const newRecord = expenseService.create(req.body);
+  const user = userService.getById(req.body.userId);
 
-  if (!newRecord) {
+  if (!user) {
     return res.sendStatus(400);
   }
 
-  const user = userService.getById(newRecord.userId);
+  const newRecord = expenseService.create(req.body);
 
-  if (!user) {
+  if (!newRecord) {
     return res.sendStatus(400);
   }
 
@@ -45,9 +45,9 @@ const remove = (req, res) => {
     return res.sendStatus(400);
   }
 
-  const expence = expenseService.getById(+id);
+  const expense = expenseService.getById(+id);
 
-  if (!expence) {
+  if (!expense) {
     return res.sendStatus(404);
   }
 

@@ -15,25 +15,14 @@ let EXPENSE = [];
 let EXPENSE_ID = 1;
 
 const getAll = ({ userId, categories, from, to }) => {
-  let result = [...EXPENSE];
+  return EXPENSE.filter((e) => {
+    const matchesUserId = userId ? e.userId === +userId : true;
+    const matchesCategory = categories ? categories.includes(e.category) : true;
+    const matchesFrom = from ? compareDates('from', from, e.spentAt) : true;
+    const matchesTo = to ? compareDates('to', to, e.spentAt) : true;
 
-  if (userId) {
-    result = result.filter((e) => e.userId === +userId);
-  }
-
-  if (categories) {
-    result = result.filter((e) => categories === e.category);
-  }
-
-  if (from) {
-    result = result.filter((e) => compareDates('from', from, e.spentAt));
-  }
-
-  if (to) {
-    result = result.filter((e) => compareDates('to', to, e.spentAt));
-  }
-
-  return result;
+    return matchesUserId && matchesCategory && matchesFrom && matchesTo;
+  });
 };
 
 const getById = (id) => {

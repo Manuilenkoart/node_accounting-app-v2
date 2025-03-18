@@ -8,6 +8,9 @@ function compareDates(compareValue, eventDate, comparisonDate) {
 
     case 'from':
       return normalizedComparisonDate > normalizedEventDate;
+
+    default:
+      return false;
   }
 }
 
